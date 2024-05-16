@@ -211,9 +211,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         }
 
     private:
-        uint16_t pick_io_service_idx()
+        size_t pick_io_service_idx()
         {
-            uint16_t min_queue_idx = 0;
+            size_t min_queue_idx = 0;
 
             // TODO improve load balancing
             // size_t is used here to avoid the security issue https://codeql.github.com/codeql-query-help/cpp/cpp-comparison-with-wider-type/
@@ -231,7 +231,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             if (!shutting_down_)
             {
-                uint16_t service_idx = pick_io_service_idx();
+                auto service_idx = pick_io_service_idx();
                 asio::io_service& is = *io_service_pool_[service_idx];
                 task_queue_length_pool_[service_idx]++;
                 CROW_LOG_DEBUG << &is << " {" << service_idx << "} queue length: " << task_queue_length_pool_[service_idx];

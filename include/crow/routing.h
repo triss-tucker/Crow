@@ -842,7 +842,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         }
 
         //Rule_index, Blueprint_index, routing_params
-        routing_handle_result find(const std::string& req_url, const Node& node, unsigned pos = 0, routing_params* params = nullptr, std::vector<uint16_t>* blueprints = nullptr) const
+        routing_handle_result find(const std::string& req_url, const Node& node, ptrdiff_t pos = 0, routing_params* params = nullptr, std::vector<uint16_t>* blueprints = nullptr) const
         {
             //start params as an empty struct
             routing_params empty;
@@ -1006,13 +1006,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         }
 
         //This functions assumes any blueprint info passed is valid
-        void add(const std::string& url, uint16_t rule_index, unsigned bp_prefix_length = 0, uint16_t blueprint_index = INVALID_BP_ID)
+        void add(const std::string& url, size_t rule_index, size_t bp_prefix_length = 0, uint16_t blueprint_index = INVALID_BP_ID)
         {
             auto idx = &head_;
 
             bool has_blueprint = bp_prefix_length != 0 && blueprint_index != INVALID_BP_ID;
 
-            for (unsigned i = 0; i < url.size(); i++)
+            for (size_t i = 0; i < url.size(); i++)
             {
                 char c = url[i];
                 if (c == '<')
@@ -1088,7 +1088,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             //check if the last node already has a value (exact url already in Trie)
             if (idx->rule_index)
                 throw std::runtime_error("handler already exists for " + url);
-            idx->rule_index = rule_index;
+            idx->rule_index = static_cast<uint16_t>(rule_index);
         }
 
     private:
@@ -1520,24 +1520,27 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             res.code = code;
             std::vector<Blueprint*> bps_found;
             get_found_bp(found.blueprint_indices, blueprints_, bps_found);
-            for (int i = bps_found.size() - 1; i > 0; i--)
+            if (bps_found.size() > 1)
             {
-                std::vector<uint16_t> bpi = found.blueprint_indices;
-                if (bps_found[i]->catchall_rule().has_handler())
+                for (auto i = bps_found.size() - 1; i > 0; i--)
                 {
-                    try
+                    //std::vector<uint16_t> bpi = found.blueprint_indices;
+                    if (bps_found[i]->catchall_rule().has_handler())
                     {
-                        bps_found[i]->catchall_rule().handler_(req, res);
-                    }
-                    catch (...)
-                    {
-                        exception_handler_(res);
-                    }
+                        try
+                        {
+                            bps_found[i]->catchall_rule().handler_(req, res);
+                        }
+                        catch (...)
+                        {
+                            exception_handler_(res);
+                        }
 #ifdef CROW_ENABLE_DEBUG
-                    return std::string("Redirected to Blueprint \"" + bps_found[i]->prefix() + "\" Catchall rule");
+                        return std::string("Redirected to Blueprint \"" + bps_found[i]->prefix() + "\" Catchall rule");
 #else
-                    return std::string();
+                        return std::string();
 #endif
+                    }
                 }
             }
             if (catchall_rule_.has_handler())

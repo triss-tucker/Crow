@@ -157,7 +157,7 @@ enum http_errno {
 
         uint32_t nread;          /* # bytes read in various scenarios */
         uint64_t content_length; /* # bytes in body. `(uint64_t) -1` (all bits one) if no Content-Length header. */
-        unsigned long qs_point;
+        ptrdiff_t qs_point;
 
         /** READ-ONLY **/
         unsigned char http_major;

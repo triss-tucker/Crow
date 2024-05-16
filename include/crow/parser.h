@@ -107,7 +107,7 @@ namespace crow
 
         // return false on error
         /// Parse a buffer into the different sections of an HTTP request.
-        bool feed(const char* buffer, int length)
+        bool feed(const char* buffer, size_t length)
         {
             if (message_complete)
                 return true;
@@ -123,7 +123,7 @@ namespace crow
               on_message_complete,
             };
 
-            int nparsed = http_parser_execute(this, &settings_, buffer, length);
+            auto nparsed = http_parser_execute(this, &settings_, buffer, length);
             if (http_errno != CHPE_OK)
             {
                 return false;
