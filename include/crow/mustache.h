@@ -234,6 +234,8 @@ namespace crow
                                 case json::type::False:
                                 case json::type::True:
                                 case json::type::Number:
+                                case json::type::Object:
+                                case json::type::List:
                                     out += ctx.dump();
                                     break;
                                 case json::type::String:
